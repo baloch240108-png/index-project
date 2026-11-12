@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abubakar Construction & Garden Renovation | Islamabad F-8</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Three.js CDN for Full 3D Scene Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#2E7D32', /* Primary Green */
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        mint: {
+                            100: '#E8F5E9',
+                            300: '#A5D6A7',
+                            500: '#81C784',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Fixed full-screen WebGL Canvas for continuous interactive 3D background */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: auto;
+        }
+
+        /* Glassmorphism containers for extreme text legibility over 3D scene */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(129, 199, 132, 0.25);
+            box-shadow: 0 20px 40px -15px rgba(46, 125, 50, 0.08);
+        }
+
+        .glass-card-dark {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(129, 199, 132, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(129, 199, 132, 0.2);
+        }
+
+        .card-3d-hover {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .card-3d-hover:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 30px 60px -12px rgba(46, 125, 50, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f8f3;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #81C784;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2E7D32;
+        }
+
+        /* Interactive Before/After Image Slider Styling */
+        .ba-container {
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            touch-action: pan-y;
+        }
+        .ba-img-after {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 50%;
+            overflow: hidden;
+        }
+        .ba-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: #ffffff;
+            cursor: ew-resize;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 20;
+        }
+        .ba-handle-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #2E7D32;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fbf9] text-slate-800 font-sans antialiased selection:bg-[#81C784]/30 selection:text-[#2E7D32] relative overflow-x-hidden">
+
+    <!-- Live Interactive 3D Background Canvas -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Content Wrapper overlay floating over 3D Canvas -->
+    <div class="relative z-10">
+
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-28 opacity-0 transition-all duration-300 glass-card-dark text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-4 border border-[#81C784]/40 max-w-sm">
+            <div class="w-10 h-10 rounded-xl bg-[#2E7D32] flex items-center justify-center text-white shrink-0">
+                <i id="toast-icon" class="fa-solid fa-circle-check text-xl"></i>
+            </div>
+            <div>
+                <h4 id="toast-title" class="font-bold text-sm">Success</h4>
+                <p id="toast-desc" class="text-xs text-slate-300 mt-0.5">Action completed successfully.</p>
+            </div>
+        </div>
+
+        <!-- Floating Direct WhatsApp Quick Action Button -->
+        <a href="https://wa.me/923061773258?text=Hello%20Abubakar%20Construction!%20I%20would%20like%20to%20inquire%20about%20a%20project%20in%20Islamabad." 
+           target="_blank" 
+           rel="noopener noreferrer"
+           aria-label="Chat on WhatsApp with Abubakar Construction"
+           class="fixed bottom-6 left-6 z-40 bg-[#25D366] hover:bg-[#20bd5a] text-white p-4 rounded-full shadow-2xl shadow-[#25D366]/40 flex items-center justify-center transition-transform hover:scale-110 group border-2 border-white">
+            <i class="fa-brands fa-whatsapp text-2xl"></i>
+            <span class="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out font-bold text-xs ml-0 group-hover:ml-2">WhatsApp Chat</span>
+        </a>
+
+        <!-- Header / Navigation -->
+        <header class="fixed top-0 left-0 right-0 z-40 glass-nav transition-all duration-300" id="navbar">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+                <a href="#" class="flex items-center space-x-3 group">
+                    <div class="w-11 h-11 rounded-2xl bg-[#2E7D32] flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-[#2E7D32]/30 group-hover:rotate-12 transition-transform">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-slate-900 block leading-none">ABUBAKAR</span>
+                        <span class="text-[10px] font-bold text-[#2E7D32] tracking-wider uppercase mt-1 block">Construction & Garden F-8</span>
+                    </div>
+                </a>
+                
+                <nav class="hidden md:flex items-center space-x-7">
+                    <a href="#hero" class="text-xs font-bold uppercase tracking-wider text-slate-700 hover:text-[#2E7D32] transition-colors">3D Scene</a>
+                    <a href="#services" class="text-xs font-bold uppercase tracking-wider text-slate-700 hover:text-[#2E7D32] transition-colors">Services & Rates</a>
+                    <a href="#calculator" class="text-xs font-bold uppercase tracking-wider text-slate-700 hover:text-[#2E7D32] transition-colors">Cost Estimator</a>
+                    <a href="#before-after" class="text-xs font-bold uppercase tracking-wider text-slate-700 hover:text-[#2E7D32] transition-colors">Transformation</a>
+                    <a href="#gallery" class="text-xs font-bold uppercase tracking-wider text-slate-700 hover:text-[#2E7D32] transition-colors">Projects</a>
+                    <a href="#contact" class="text-xs font-bold uppercase tracking-wider text-slate-700 hover:text-[#2E7D32] transition-colors">Contact</a>
+                </nav>
+
+                <div class="flex items-center space-x-3">
+                    <a href="tel:03061773258" class="hidden sm:flex items-center space-x-2 bg-[#E8F5E9] text-[#2E7D32] px-4 py-2.5 rounded-xl font-bold text-xs hover:bg-[#81C784]/20 transition-all border border-[#81C784]/40">
+                        <i class="fa-solid fa-phone text-[#2E7D32] animate-pulse"></i>
+                        <span>0306 1773258</span>
+                    </a>
+                    <a href="#calculator" class="bg-[#2E7D32] hover:bg-[#15803d] text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-lg shadow-[#2E7D32]/30 transition-all hover:shadow-xl">
+                        Get Estimate
+                    </a>
+                    <button id="mobile-menu-btn" aria-label="Toggle mobile navigation menu" class="md:hidden text-slate-800 p-2 text-xl focus:outline-none">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-xl border-b border-slate-200 px-6 py-5 space-y-3 shadow-2xl">
+                <a href="#hero" class="block text-sm font-bold text-slate-700 hover:text-[#2E7D32]">3D Scene View</a>
+                <a href="#services" class="block text-sm font-bold text-slate-700 hover:text-[#2E7D32]">Services & Transparent Pricing</a>
+                <a href="#calculator" class="block text-sm font-bold text-slate-700 hover:text-[#2E7D32]">Instant Quote Calculator</a>
+                <a href="#before-after" class="block text-sm font-bold text-slate-700 hover:text-[#2E7D32]">Transformation Slider</a>
+                <a href="#gallery" class="block text-sm font-bold text-slate-700 hover:text-[#2E7D32]">Project Portfolio</a>
+                <a href="#contact" class="block text-sm font-bold text-slate-700 hover:text-[#2E7D32]">Book Site Inspection</a>
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-500">F-8, Islamabad</span>
+                    <a href="tel:03061773258" class="text-[#2E7D32] font-black text-sm">0306 1773258</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-screen pt-32 pb-20 flex items-center relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    
+                    <!-- Left Main Callout Floating Glass Panel -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="inline-flex items-center space-x-2 bg-[#E8F5E9] text-[#2E7D32] px-4 py-2 rounded-full text-xs font-extrabold tracking-wide uppercase border border-[#81C784]/40 shadow-sm">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Sector F-8, Islamabad Specialist</span>
+                        </div>
+                        
+                        <h1 class="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                            Architectural Construction & <span class="text-[#2E7D32] bg-clip-text text-transparent bg-gradient-to-r from-[#2E7D32] to-[#81C784]">3D Garden Renovation</span>
+                        </h1>
+                        
+                        <p class="text-slate-600 font-medium text-base sm:text-lg max-w-xl leading-relaxed">
+                            Bespoke outdoor remodeling, garden framing, custom pergolas, boundary wall tilework, and luxury villa structural additions in Sector F-8 and across Islamabad.
+                        </p>
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-2">
+                            <a href="#calculator" class="bg-[#2E7D32] hover:bg-[#15803d] text-white font-bold px-8 py-4 rounded-2xl shadow-xl shadow-[#2E7D32]/30 transition-all text-center flex items-center justify-center space-x-3 group text-sm">
+                                <span>Calculate Project Price</span>
+                                <i class="fa-solid fa-arrow-right group-hover:translate-x-1.5 transition-transform"></i>
+                            </a>
+                            <a href="tel:03061773258" class="glass-card hover:bg-white text-slate-800 font-bold px-8 py-4 rounded-2xl transition-all text-center flex items-center justify-center space-x-2 text-sm border border-slate-200/80">
+                                <i class="fa-solid fa-phone text-[#2E7D32]"></i>
+                                <span>0306 1773258</span>
+                            </a>
+                        </div>
+
+                        <!-- 3D Controls Badge & Scene Quick Info -->
+                        <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200/80 mt-6">
+                            <div class="glass-card p-4 rounded-2xl text-center">
+                                <h4 class="text-2xl sm:text-3xl font-black text-slate-900">10+</h4>
+                                <p class="text-[11px] font-bold text-slate-500 uppercase mt-0.5">Years Experience</p>
+                            </div>
+                            <div class="glass-card p-4 rounded-2xl text-center">
+                                <h4 class="text-2xl sm:text-3xl font-black text-[#2E7D32]">F-8</h4>
+                                <p class="text-[11px] font-bold text-slate-500 uppercase mt-0.5">Islamabad Hub</p>
+                            </div>
+                            <div class="glass-card p-4 rounded-2xl text-center">
+                                <h4 class="text-2xl sm:text-3xl font-black text-slate-900">100%</h4>
+                                <p class="text-[11px] font-bold text-slate-500 uppercase mt-0.5">Turnkey Quality</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Feature Card -->
+                    <div class="lg:col-span-5">
+                        <div class="glass-card p-6 sm:p-8 rounded-3xl relative border border-[#81C784]/30 shadow-2xl space-y-6">
+                            <div class="flex items-center justify-between border-b border-slate-200/80 pb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-[#2E7D32] text-white flex items-center justify-center text-lg font-bold">
+                                        <i class="fa-solid fa-cube"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-black text-slate-900 text-sm">Interactive 3D Scene</h3>
+                                        <p class="text-xs text-slate-500">Move cursor / drag to inspect</p>
+                                    </div>
+                                </div>
+                                <button onclick="toggleSceneSpin()" id="spin-toggle-btn" class="bg-[#E8F5E9] text-[#2E7D32] text-xs font-bold px-3 py-1.5 rounded-xl border border-[#81C784]/40 hover:bg-[#81C784]/30 transition-all">
+                                    <i class="fa-solid fa-pause mr-1"></i> Pause Spin
+                                </button>
+                            </div>
+
+                            <!-- Image Preview Container -->
+                            <div class="rounded-2xl overflow-hidden h-52 relative border border-slate-200/60 shadow-inner group">
+                                <img src="https://images.unsplash.com/photo-1558904541-efa873a819ab?auto=format&fit=crop&w=1000&q=80" 
+                                     alt="Modern Islamabad Villa Garden Design" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Islamabad+Garden+Renovation'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end p-4">
+                                    <div>
+                                        <span class="text-xs font-extrabold text-[#81C784] uppercase tracking-wider">Sector F-8 Showcase</span>
+                                        <h4 class="text-white font-bold text-sm">Garden Framing & Hardscape Architectural Layout</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 text-xs">
+                                <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                    <span class="text-slate-500 font-medium">Head Contractor:</span>
+                                    <span class="font-extrabold text-slate-800">Abubakar</span>
+                                </div>
+                                <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                    <span class="text-slate-500 font-medium">Phone / WhatsApp:</span>
+                                    <a href="tel:03061773258" class="font-extrabold text-[#2E7D32] hover:underline">0306 1773258</a>
+                                </div>
+                                <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                    <span class="text-slate-500 font-medium">Direct Email:</span>
+                                    <span class="font-extrabold text-slate-800">abubakar21564@gmail.com</span>
+                                </div>
+                                <div class="flex justify-between items-center py-1.5">
+                                    <span class="text-slate-500 font-medium">Service Coverage:</span>
+                                    <span class="font-extrabold text-slate-800">Islamabad (F-6, F-7, F-8, E-7, Sector G, Bahria)</span>
+                                </div>
+                            </div>
+
+                            <a href="#contact" class="w-full bg-[#2E7D32] hover:bg-[#15803d] text-white font-bold py-3 rounded-xl text-xs text-center block shadow-lg shadow-[#2E7D32]/30 transition-all">
+                                Request Free On-Site Consultation
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Services & Transparent Rate Card Section -->
+        <section id="services" class="py-24 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                    <span class="text-xs font-black uppercase tracking-widest text-[#2E7D32] bg-[#E8F5E9] px-4 py-2 rounded-full border border-[#81C784]/40 shadow-sm">Standardized Islamabad Rates</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Services & Transparent Pricing List</h2>
+                    <p class="text-slate-600 font-medium text-sm sm:text-base">Top-tier construction and garden architectural services with clear pricing tailored for residential and commercial properties in Islamabad.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Service 1 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                        <div>
+                            <div class="h-56 overflow-hidden relative">
+                                <img src="https://images.unsplash.com/photo-1584467735811-c9185a8397a6?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Garden Framing & Pergola Structure" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Garden+Framing'">
+                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-black text-[#2E7D32]">High Demand</div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black text-slate-900 mb-2">Garden Framing & Structural Pergolas</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed">
+                                    Custom steel and hardwood garden frame construction, weatherproof pergolas, structural trellises, and architectural plant boundaries.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <div class="bg-[#E8F5E9]/60 p-4 rounded-2xl mb-4 border border-[#81C784]/30 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Project Rate</span>
+                                <span class="text-sm font-black text-[#2E7D32]">PKR 45,000 - 150,000</span>
+                            </div>
+                            <button onclick="presetCalculator('Garden Framing', 80000)" class="w-full bg-slate-900 hover:bg-[#2E7D32] text-white font-bold py-3 rounded-xl text-xs transition-colors shadow-md">
+                                Calculate in Estimator &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service 2 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                        <div>
+                            <div class="h-56 overflow-hidden relative">
+                                <img src="https://images.unsplash.com/photo-1557429287-b2e26467fc2b?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Lawn & Landscape Renovation" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Lawn+Landscape'">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black text-slate-900 mb-2">Full Lawn & Landscape Renovation</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed">
+                                    Soil grading, fresh Korean / American grass turf installation, automated pop-up sprinkler irrigation, and exotic flower bed structuring.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <div class="bg-[#E8F5E9]/60 p-4 rounded-2xl mb-4 border border-[#81C784]/30 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Project Rate</span>
+                                <span class="text-sm font-black text-[#2E7D32]">PKR 85,000 - 250,000</span>
+                            </div>
+                            <button onclick="presetCalculator('Landscape Renovation', 120000)" class="w-full bg-slate-900 hover:bg-[#2E7D32] text-white font-bold py-3 rounded-xl text-xs transition-colors shadow-md">
+                                Calculate in Estimator &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service 3 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                        <div>
+                            <div class="h-56 overflow-hidden relative">
+                                <img src="https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Boundary Wall Tile & Stone Work" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Tile+Work'">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black text-slate-900 mb-2">Exterior & Boundary Wall Tile Work</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed">
+                                    Porcelain wall tiling, natural Slate stone cladding, marble accents, water-proof grouting, and precision boundary wall alignment.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <div class="bg-[#E8F5E9]/60 p-4 rounded-2xl mb-4 border border-[#81C784]/30 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Unit Rate</span>
+                                <span class="text-sm font-black text-[#2E7D32]">PKR 120 <span class="text-[10px] font-normal text-slate-500">/ sq.ft</span></span>
+                            </div>
+                            <button onclick="presetCalculator('Exterior Tile Work', 120)" class="w-full bg-slate-900 hover:bg-[#2E7D32] text-white font-bold py-3 rounded-xl text-xs transition-colors shadow-md">
+                                Calculate in Estimator &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service 4 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                        <div>
+                            <div class="h-56 overflow-hidden relative">
+                                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Custom Patio & Hardscaping" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Patio+Hardscape'">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black text-slate-900 mb-2">Custom Patio & Hardscaping</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed">
+                                    Interlocking pavers, stamped concrete driveways, stone garden walkways, fire-pit seating zones, and drainage optimization.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <div class="bg-[#E8F5E9]/60 p-4 rounded-2xl mb-4 border border-[#81C784]/30 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Unit Rate</span>
+                                <span class="text-sm font-black text-[#2E7D32]">PKR 350 <span class="text-[10px] font-normal text-slate-500">/ sq.ft</span></span>
+                            </div>
+                            <button onclick="presetCalculator('Custom Patio', 350)" class="w-full bg-slate-900 hover:bg-[#2E7D32] text-white font-bold py-3 rounded-xl text-xs transition-colors shadow-md">
+                                Calculate in Estimator &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service 5 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                        <div>
+                            <div class="h-56 overflow-hidden relative">
+                                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Full Villa Exterior Facade Remodeling" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Villa+Facade'">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black text-slate-900 mb-2">Full Villa Exterior Facade Remodeling</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed">
+                                    Modern villa front elevation overhauls, exterior Weather-Shield painting, damp proofing treatment, and accent outdoor lighting.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <div class="bg-[#E8F5E9]/60 p-4 rounded-2xl mb-4 border border-[#81C784]/30 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Project Rate</span>
+                                <span class="text-sm font-black text-[#2E7D32]">PKR 350,000+</span>
+                            </div>
+                            <button onclick="presetCalculator('Villa Facade Remodeling', 350000)" class="w-full bg-slate-900 hover:bg-[#2E7D32] text-white font-bold py-3 rounded-xl text-xs transition-colors shadow-md">
+                                Calculate in Estimator &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service 6 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden flex flex-col justify-between group">
+                        <div>
+                            <div class="h-56 overflow-hidden relative">
+                                <img src="https://images.unsplash.com/photo-1541888946425-d0fbb18fef4b?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Interior & Structural Framing Work" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.src='https://placehold.co/800x600/2E7D32/ffffff?text=Structural+Framing'">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-black text-slate-900 mb-2">Interior & Structural Framing Work</h3>
+                                <p class="text-slate-600 text-xs leading-relaxed">
+                                    Civil construction, room additions, load-bearing beam framing, brick masonry, plastering, and general residential structural works.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0">
+                            <div class="bg-[#E8F5E9]/60 p-4 rounded-2xl mb-4 border border-[#81C784]/30 flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Unit Rate</span>
+                                <span class="text-sm font-black text-[#2E7D32]">PKR 1,200 <span class="text-[10px] font-normal text-slate-500">/ sq.ft</span></span>
+                            </div>
+                            <button onclick="presetCalculator('Structural Framing', 1200)" class="w-full bg-slate-900 hover:bg-[#2E7D32] text-white font-bold py-3 rounded-xl text-xs transition-colors shadow-md">
+                                Calculate in Estimator &rarr;
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive 3D Cost Estimator / Price Calculator -->
+        <section id="calculator" class="py-20 relative">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="glass-card-dark rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden border border-[#81C784]/30">
+                    <!-- Background green ambient light mesh -->
+                    <div class="absolute -right-24 -bottom-24 w-96 h-96 bg-[#2E7D32]/30 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="text-center max-w-2xl mx-auto mb-10 space-y-3">
+                        <span class="text-xs font-black uppercase tracking-widest text-[#81C784] bg-white/10 px-4 py-1.5 rounded-full border border-white/20">Instant Budget Estimator</span>
+                        <h2 class="text-3xl sm:text-4xl font-black tracking-tight">Interactive PKR Cost Estimator</h2>
+                        <p class="text-slate-300 text-xs sm:text-sm">Select service type and adjust project area scale to generate instant estimate for your Islamabad property.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/80 p-6 sm:p-8 rounded-2xl border border-white/10">
+                        <div class="lg:col-span-7 space-y-6">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">1. Select Service Category</label>
+                                <select id="calc-service" onchange="calculateQuote()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3.5 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784] font-medium">
+                                    <option value="120" data-type="sqft">Exterior & Boundary Wall Tile Work (PKR 120 / sq.ft)</option>
+                                    <option value="350" data-type="sqft">Custom Patio & Hardscaping (PKR 350 / sq.ft)</option>
+                                    <option value="1200" data-type="sqft">Interior & Structural Framing Work (PKR 1,200 / sq.ft)</option>
+                                    <option value="80000" data-type="fixed">Garden Framing & Structural Pergolas (Avg PKR 80,000)</option>
+                                    <option value="150000" data-type="fixed">Full Lawn & Landscape Renovation (Avg PKR 150,000)</option>
+                                    <option value="350000" data-type="fixed">Full Villa Exterior Facade Remodeling (Base PKR 350,000)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784]">2. Area / Scale Selection</label>
+                                    <span id="slider-value-badge" class="text-xs font-bold text-white bg-[#2E7D32] px-3 py-1 rounded-md">500 Sq. Ft</span>
+                                </div>
+                                <input type="range" id="calc-slider" min="50" max="5000" step="50" value="500" oninput="calculateQuote()" class="w-full accent-[#81C784] cursor-pointer h-2 bg-slate-700 rounded-lg">
+                                <div class="flex justify-between text-[11px] text-slate-400 mt-1 font-mono">
+                                    <span>50 Sq.Ft</span>
+                                    <span>2,500 Sq.Ft</span>
+                                    <span>5,000 Sq.Ft</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">3. Urgency & Completion Speed</label>
+                                <select id="calc-urgency" onchange="calculateQuote()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784]">
+                                    <option value="1.0">Standard Schedule (Normal Rate)</option>
+                                    <option value="1.15">Fast-Track Priority (+15% speed crew)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-5 bg-slate-950/90 p-6 sm:p-8 rounded-2xl border border-[#81C784]/40 flex flex-col justify-between space-y-6">
+                            <div>
+                                <span class="text-xs font-extrabold text-[#81C784] uppercase tracking-wider block">Estimated Project Budget</span>
+                                <div class="text-3xl sm:text-4xl font-black text-white mt-2 tracking-tight" id="estimated-total">PKR 60,000</div>
+                                <p class="text-[11px] text-slate-400 mt-3 leading-relaxed">
+                                    * Estimated budget based on Sector F-8 standard material & labor rates. Final quote is locked after free physical inspection.
+                                </p>
+                            </div>
+
+                            <div class="space-y-3">
+                                <button onclick="prefillBookingFromCalc()" class="w-full bg-[#2E7D32] hover:bg-[#15803d] text-white font-bold py-3.5 rounded-xl text-xs text-center block shadow-lg shadow-[#2E7D32]/40 transition-all">
+                                    Book Free Site Inspection &rarr;
+                                </button>
+                                <a id="calc-whatsapp-btn" href="#" target="_blank" class="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-3 rounded-xl text-xs text-center flex items-center justify-center space-x-2 transition-all">
+                                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                                    <span>Send Estimate to WhatsApp</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Before/After Transformation Interactive Slider -->
+        <section id="before-after" class="py-24 relative">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-14 space-y-4">
+                    <span class="text-xs font-black uppercase tracking-widest text-[#2E7D32] bg-[#E8F5E9] px-4 py-2 rounded-full border border-[#81C784]/40">Visual Results</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Garden & Structure Transformation</h2>
+                    <p class="text-slate-600 font-medium text-sm">Drag the handle left and right to inspect our real project transformation in Sector F-8, Islamabad.</p>
+                </div>
+
+                <div class="glass-card p-4 sm:p-6 rounded-3xl border border-[#81C784]/30 shadow-2xl">
+                    <div id="ba-slider" class="ba-container rounded-2xl h-[350px] sm:h-[500px] w-full border border-slate-200">
+                        <!-- Before Image (Underneath) -->
+                        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80" 
+                             alt="Before Renovation" 
+                             class="w-full h-full object-cover"
+                             onerror="this.src='https://placehold.co/1200x800/cccccc/333333?text=Before+Transformation'">
+                        
+                        <!-- After Image (Clipped Overlay) -->
+                        <div id="ba-after-wrap" class="ba-img-after">
+                            <img src="https://images.unsplash.com/photo-1558904541-efa873a819ab?auto=format&fit=crop&w=1200&q=80" 
+                                 alt="After Renovation" 
+                                 class="absolute top-0 left-0 max-w-none h-full object-cover" 
+                                 id="ba-after-img"
+                                 onerror="this.src='https://placehold.co/1200x800/2E7D32/ffffff?text=After+Transformation'">
+                        </div>
+
+                        <!-- Interactive Handle -->
+                        <div id="ba-handle" class="ba-handle">
+                            <div class="ba-handle-button">
+                                <i class="fa-solid fa-arrows-left-right text-xs"></i>
+                            </div>
+                        </div>
+
+                        <!-- Labels -->
+                        <span class="absolute top-4 left-4 z-10 bg-slate-900/80 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl backdrop-blur-md border border-white/20">BEFORE</span>
+                        <span class="absolute top-4 right-4 z-10 bg-[#2E7D32]/90 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl backdrop-blur-md border border-white/20">AFTER ABUBAKAR WORK</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Portfolio Gallery Section -->
+        <section id="gallery" class="py-24 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+                    <span class="text-xs font-black uppercase tracking-widest text-[#2E7D32] bg-[#E8F5E9] px-4 py-2 rounded-full border border-[#81C784]/40">Islamabad Portfolio</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Recent Projects in Sector F-8</h2>
+                    <p class="text-slate-600 font-medium text-sm">High-resolution execution showcase of garden framing, tile work, pergolas, and civil additions.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Project 1 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden group">
+                        <div class="h-64 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1558904541-efa873a819ab?auto=format&fit=crop&w=800&q=80" 
+                                 alt="Sector F-8 Villa Garden Remodeling" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-[#2E7D32]">Islamabad F-8/2</div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-lg font-black text-slate-900 mb-1">Garden Frame & Wooden Pergola Overhaul</h4>
+                            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Complete structural frame change, teakwood polish pergola, and lawn edging for a luxury villa.</p>
+                            <div class="flex items-center justify-between text-xs font-extrabold text-[#2E7D32] pt-3 border-t border-slate-100">
+                                <span>Duration: 12 Days</span>
+                                <span>Garden Remodeling</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden group">
+                        <div class="h-64 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=800&q=80" 
+                                 alt="Natural Stone Walkway & Tile Paving" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-[#2E7D32]">Islamabad F-8/4</div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-lg font-black text-slate-900 mb-1">Stone Walkway & Boundary Wall Tile</h4>
+                            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Interlocking patio pavers, slate boundary wall tiling, and accent ground spotlights.</p>
+                            <div class="flex items-center justify-between text-xs font-extrabold text-[#2E7D32] pt-3 border-t border-slate-100">
+                                <span>Duration: 8 Days</span>
+                                <span>Hardscaping & Tile</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="glass-card card-3d-hover rounded-3xl overflow-hidden group">
+                        <div class="h-64 overflow-hidden relative">
+                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" 
+                                 alt="Modern Exterior Facade & Painting" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-[#2E7D32]">Islamabad E-7</div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-lg font-black text-slate-900 mb-1">Modern Exterior Facade & Framing</h4>
+                            <p class="text-xs text-slate-500 mb-4 leading-relaxed">Full front elevation structural modification, Weather-Shield coating, and main gate steel framing.</p>
+                            <div class="flex items-center justify-between text-xs font-extrabold text-[#2E7D32] pt-3 border-t border-slate-100">
+                                <span>Duration: 3 Weeks</span>
+                                <span>Facade Remodeling</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact & Direct Booking Section -->
+        <section id="contact" class="py-24 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    
+                    <!-- Details -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <span class="text-xs font-black uppercase tracking-widest text-[#2E7D32] bg-[#E8F5E9] px-4 py-2 rounded-full border border-[#81C784]/40">Direct Contact</span>
+                        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Let's Discuss Your Project in Islamabad</h2>
+                        <p class="text-slate-600 text-sm leading-relaxed font-medium">
+                            Ready to transform your garden frame, replace outdoor tiles, or start civil construction? Call or WhatsApp Abubakar directly or send an inquiry below.
+                        </p>
+
+                        <div class="space-y-4 pt-2">
+                            <!-- Call -->
+                            <a href="tel:03061773258" class="flex items-center space-x-4 p-4 rounded-2xl glass-card hover:bg-white transition-all border border-[#81C784]/30 group">
+                                <div class="w-12 h-12 rounded-xl bg-[#2E7D32] text-white flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Direct Mobile / Call</span>
+                                    <span class="text-base font-black text-slate-900">0306 1773258</span>
+                                </div>
+                            </a>
+
+                            <!-- WhatsApp -->
+                            <a href="https://wa.me/923061773258" target="_blank" class="flex items-center space-x-4 p-4 rounded-2xl glass-card hover:bg-white transition-all border border-[#81C784]/30 group">
+                                <div class="w-12 h-12 rounded-xl bg-[#25D366] text-white flex items-center justify-center text-xl shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">WhatsApp Instant Message</span>
+                                    <span class="text-base font-black text-slate-900">+92 306 1773258</span>
+                                </div>
+                            </a>
+
+                            <!-- Email -->
+                            <a href="mailto:abubakar21564@gmail.com" class="flex items-center space-x-4 p-4 rounded-2xl glass-card hover:bg-white transition-all border border-[#81C784]/30 group">
+                                <div class="w-12 h-12 rounded-xl bg-[#2E7D32] text-white flex items-center justify-center text-lg shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Official Email</span>
+                                    <span class="text-sm font-black text-slate-900">abubakar21564@gmail.com</span>
+                                </div>
+                            </a>
+
+                            <!-- Location -->
+                            <div class="flex items-center space-x-4 p-4 rounded-2xl glass-card border border-[#81C784]/30">
+                                <div class="w-12 h-12 rounded-xl bg-[#2E7D32] text-white flex items-center justify-center text-lg shadow-md">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Office Address</span>
+                                    <span class="text-sm font-black text-slate-900">Sector F-8, Islamabad, Pakistan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Form -->
+                    <div class="lg:col-span-7 glass-card-dark text-white p-8 sm:p-10 rounded-3xl shadow-2xl relative border border-[#81C784]/30">
+                        <h3 class="text-2xl font-black mb-2">Book Free On-Site Inspection</h3>
+                        <p class="text-slate-300 text-xs mb-8">Submit your project details and Abubakar will contact you within 2 hours.</p>
+
+                        <form id="booking-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">Your Full Name</label>
+                                    <input type="text" id="form-name" required placeholder="e.g. Usman Chaudhry" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">Phone / WhatsApp Number</label>
+                                    <input type="tel" id="form-phone" required placeholder="0300 1234567" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784]">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">Property Sector / Location</label>
+                                    <input type="text" id="form-location" required placeholder="e.g. Sector F-8/2, Islamabad" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784]">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">Primary Service Requested</label>
+                                    <select id="form-service" class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784]">
+                                        <option value="Garden Framing & Pergolas">Garden Framing & Structural Pergolas</option>
+                                        <option value="Full Lawn & Landscape">Full Lawn & Landscape Renovation</option>
+                                        <option value="Exterior Wall Tile Work">Exterior & Boundary Wall Tile Work</option>
+                                        <option value="Custom Patio & Hardscaping">Custom Patio & Hardscaping</option>
+                                        <option value="Full Villa Exterior Remodeling">Full Villa Exterior Facade Remodeling</option>
+                                        <option value="Interior & Structural Framing">Interior & Structural Framing Work</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-[#81C784] mb-2">Project Details & Notes</label>
+                                <textarea id="form-message" rows="4" required placeholder="Mention square footage, garden frame requirements, or timeline in Islamabad..." class="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#81C784]"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-[#2E7D32] hover:bg-[#15803d] text-white font-bold py-4 rounded-xl shadow-lg shadow-[#2E7D32]/40 transition-all flex items-center justify-center space-x-2 text-xs sm:text-sm">
+                                <span>Submit Inspection Booking</span>
+                                <i class="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-800 relative z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#2E7D32] flex items-center justify-center text-white font-black text-xl">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div>
+                            <span class="text-sm font-black text-white tracking-wider block">ABUBAKAR CONSTRUCTION & GARDEN</span>
+                            <span class="text-[11px] text-slate-500">Sector F-8, Islamabad, Pakistan</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap justify-center gap-6 text-xs font-medium">
+                        <a href="tel:03061773258" class="hover:text-[#81C784] transition-colors"><i class="fa-solid fa-phone mr-1.5 text-[#2E7D32]"></i> 0306 1773258</a>
+                        <a href="mailto:abubakar21564@gmail.com" class="hover:text-[#81C784] transition-colors"><i class="fa-solid fa-envelope mr-1.5 text-[#2E7D32]"></i> abubakar21564@gmail.com</a>
+                        <span><i class="fa-solid fa-location-dot mr-1.5 text-[#2E7D32]"></i> Islamabad F-8</span>
+                    </div>
+
+                    <div class="text-[11px] text-slate-600">
+                        &copy; 2026 Abubakar Construction. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Interactive 3D WebGL Background Scene & Application Logic -->
+    <script>
+        // Global variables for full-canvas 3D Scene
+        let scene, camera, renderer;
+        let houseGroup, foliageGroup, geometryGroup;
+        let mouseX = 0, mouseY = 0;
+        let targetScrollY = 0;
+        let isSpinning = true;
+
+        function initFull3DScene() {
+            const canvas = document.getElementById('webgl-canvas');
+            if(!canvas) return;
+
+            // 1. Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8fbf9); // Light soft mint background tint
+            scene.fog = new THREE.FogExp2(0xf8fbf9, 0.015);
+
+            // 2. Camera setup
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 45);
+
+            // 3. Renderer setup
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+
+            // 4. Lighting setup (Soft Sage Green & Warm Natural Lighting)
+            const ambientLight = new THREE.AmbientLight(0xe8f5e9, 1.2);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0x81C784, 1.8);
+            mainLight.position.set(20, 40, 20);
+            scene.add(mainLight);
+
+            const warmLight = new THREE.DirectionalLight(0xfff8e1, 0.8);
+            warmLight.position.set(-20, -10, -10);
+            scene.add(warmLight);
+
+            // 5. Build 3D Architectural Wireframe Structure (House & Pergola Frame)
+            houseGroup = new THREE.Group();
+
+            // Main House Frame
+            const houseGeo = new THREE.BoxGeometry(16, 12, 16);
+            const houseMat = new THREE.MeshStandardMaterial({
+                color: 0x2E7D32,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.25
+            });
+            const houseMesh = new THREE.Mesh(houseGeo, houseMat);
+            houseGroup.add(houseMesh);
+
+            // Roof Framing Pyramid
+            const roofGeo = new THREE.ConeGeometry(13, 7, 4);
+            const roofMat = new THREE.MeshStandardMaterial({
+                color: 0x81C784,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.35
+            });
+            const roofMesh = new THREE.Mesh(roofGeo, roofMat);
+            roofMesh.position.y = 9.5;
+            roofMesh.rotation.y = Math.PI / 4;
+            houseGroup.add(roofMesh);
+
+            // Pergola Beams
+            for(let i = -6; i <= 6; i += 3) {
+                const beamGeo = new THREE.BoxGeometry(18, 0.6, 0.6);
+                const beamMat = new THREE.MeshStandardMaterial({ color: 0x2E7D32, roughness: 0.3 });
+                const beam = new THREE.Mesh(beamGeo, beamMat);
+                beam.position.set(0, 6.2, i);
+                houseGroup.add(beam);
+            }
+
+            houseGroup.position.set(0, 0, 0);
+            scene.add(houseGroup);
+
+            // 6. Floating Garden Foliage Leaves Particles
+            foliageGroup = new THREE.Group();
+            const leafGeo = new THREE.TetrahedronGeometry(0.8, 1);
+            const leafMat = new THREE.MeshStandardMaterial({
+                color: 0x81C784,
+                roughness: 0.5,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 0.75
+            });
+
+            for(let i = 0; i < 65; i++) {
+                const leaf = new THREE.Mesh(leafGeo, leafMat);
+                leaf.position.set(
+                    (Math.random() - 0.5) * 80,
+                    (Math.random() - 0.5) * 60,
+                    (Math.random() - 0.5) * 50
+                );
+                leaf.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+                leaf.scale.setScalar(0.6 + Math.random() * 0.8);
+                
+                foliageGroup.add(leaf);
+            }
+            scene.add(foliageGroup);
+
+            // 7. Floating Architectural Geometries
+            geometryGroup = new THREE.Group();
+            const geoms = [
+                new THREE.IcosahedronGeometry(2, 0),
+                new THREE.TorusGeometry(3, 0.4, 16, 50),
+                new THREE.CylinderGeometry(1, 1, 6, 8)
+            ];
+
+            for(let i = 0; i < 15; i++) {
+                const mat = new THREE.MeshStandardMaterial({
+                    color: i % 2 === 0 ? 0x2E7D32 : 0x81C784,
+                    wireframe: i % 3 === 0,
+                    transparent: true,
+                    opacity: 0.4
+                });
+                const mesh = new THREE.Mesh(geoms[i % geoms.length], mat);
+                mesh.position.set(
+                    (Math.random() - 0.5) * 70,
+                    (Math.random() - 0.5) * 50,
+                    (Math.random() - 0.5) * 40
+                );
+                geometryGroup.add(mesh);
+            }
+            scene.add(geometryGroup);
+
+            // Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('scroll', onScroll);
+
+            animate3D();
+        }
+
+        function onMouseMove(e) {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.001;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.001;
+        }
+
+        function onScroll() {
+            targetScrollY = window.scrollY * 0.01;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function toggleSceneSpin() {
+            isSpinning = !isSpinning;
+            const btn = document.getElementById('spin-toggle-btn');
+            if(isSpinning) {
+                btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i> Pause Spin';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Resume Spin';
+            }
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            // Smooth rotational response to scroll & mouse
+            if(isSpinning) {
+                houseGroup.rotation.y += 0.003;
+                houseGroup.rotation.x = Math.sin(Date.now() * 0.001) * 0.1 + targetScrollY * 0.05;
+            }
+
+            // Camera dynamic movement on scroll & parallax
+            camera.position.x += (mouseX * 20 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 20 - targetScrollY * 0.8 + 5 - camera.position.y) * 0.05;
+            camera.lookAt(0, -targetScrollY * 0.2, 0);
+
+            // Animate foliage floating leaves
+            foliageGroup.children.forEach((leaf, idx) => {
+                leaf.rotation.x += 0.005;
+                leaf.rotation.y += 0.008;
+                leaf.position.y += Math.sin(Date.now() * 0.001 + idx) * 0.015;
+            });
+
+            // Animate floating geoms
+            geometryGroup.children.forEach((geom, idx) => {
+                geom.rotation.x += 0.004;
+                geom.rotation.z += 0.003;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Price Calculator Functionality
+        function calculateQuote() {
+            const selectElem = document.getElementById('calc-service');
+            const selectedOption = selectElem.options[selectElem.selectedIndex];
+            const rate = parseFloat(selectedOption.value);
+            const isSqFt = selectedOption.getAttribute('data-type') === 'sqft';
+            const sliderVal = parseInt(document.getElementById('calc-slider').value);
+            const urgency = parseFloat(document.getElementById('calc-urgency').value);
+
+            const badge = document.getElementById('slider-value-badge');
+            if(isSqFt) {
+                badge.textContent = sliderVal.toLocaleString() + ' Sq. Ft';
+            } else {
+                badge.textContent = Math.round(sliderVal / 100) + ' Unit Scale';
+            }
+
+            let total = 0;
+            if(isSqFt) {
+                total = rate * sliderVal * urgency;
+            } else {
+                total = rate * (1 + (sliderVal - 500) / 5000) * urgency;
+            }
+
+            total = Math.round(total / 500) * 500; // Round to nearest 500
+            document.getElementById('estimated-total').textContent = 'PKR ' + total.toLocaleString();
+
+            // Update WhatsApp prefilled estimate link
+            const serviceName = selectedOption.text.split('(')[0].trim();
+            const waMsg = encodeURIComponent(`Hi Abubakar Construction! I used your online estimator for "${serviceName}" (${isSqFt ? sliderVal + ' sqft' : 'Standard Scale'}). Estimated budget is PKR ${total.toLocaleString()}. Please book an on-site visit.`);
+            document.getElementById('calc-whatsapp-btn').href = `https://wa.me/923061773258?text=${waMsg}`;
+        }
+
+        function presetCalculator(serviceKeyword, baseVal) {
+            const selectElem = document.getElementById('calc-service');
+            for(let i = 0; i < selectElem.options.length; i++) {
+                if(selectElem.options[i].text.toLowerCase().includes(serviceKeyword.toLowerCase())) {
+                    selectElem.selectedIndex = i;
+                    break;
+                }
+            }
+            calculateQuote();
+            document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+            showToast('Service Loaded', `Loaded "${serviceKeyword}" into PKR Cost Estimator`);
+        }
+
+        function prefillBookingFromCalc() {
+            const selectElem = document.getElementById('calc-service');
+            const serviceText = selectElem.options[selectElem.selectedIndex].text.split('(')[0].trim();
+            const estTotal = document.getElementById('estimated-total').textContent;
+            
+            document.getElementById('form-message').value = `I calculated an estimated quote of ${estTotal} for ${serviceText}. Please schedule a site visit in Islamabad.`;
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Before / After Slider Interaction
+        function initBeforeAfterSlider() {
+            const container = document.getElementById('ba-slider');
+            const afterWrap = document.getElementById('ba-after-wrap');
+            const afterImg = document.getElementById('ba-after-img');
+            const handle = document.getElementById('ba-handle');
+            let isDragging = false;
+
+            function updateSliderPos(x) {
+                const rect = container.getBoundingClientRect();
+                let pos = x - rect.left;
+                if(pos < 0) pos = 0;
+                if(pos > rect.width) pos = rect.width;
+
+                const percentage = (pos / rect.width) * 100;
+                afterWrap.style.width = percentage + '%';
+                afterImg.style.width = rect.width + 'px';
+                handle.style.left = percentage + '%';
+            }
+
+            container.addEventListener('mousedown', (e) => { isDragging = true; updateSliderPos(e.clientX); });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+            window.addEventListener('mousemove', (e) => { if(isDragging) updateSliderPos(e.clientX); });
+
+            // Touch support
+            container.addEventListener('touchstart', (e) => { isDragging = true; updateSliderPos(e.touches[0].clientX); });
+            window.addEventListener('touchend', () => { isDragging = false; });
+            window.addEventListener('touchmove', (e) => { if(isDragging) updateSliderPos(e.touches[0].clientX); });
+
+            // Initial alignment on resize
+            window.addEventListener('resize', () => {
+                const rect = container.getBoundingClientRect();
+                afterImg.style.width = rect.width + 'px';
+            });
+            afterImg.style.width = container.getBoundingClientRect().width + 'px';
+        }
+
+        // Toast Notification Helper
+        function showToast(title, desc) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-desc').textContent = desc;
+
+            toast.classList.remove('translate-y-28', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-28', 'opacity-0');
+            }, 4000);
+        }
+
+        // Booking Form Handling
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('form-name').value;
+            const phone = document.getElementById('form-phone').value;
+            const service = document.getElementById('form-service').value;
+
+            showToast('Inspection Booked!', `Thank you ${name}. Abubakar will contact you at ${phone} for ${service}.`);
+            document.getElementById('booking-form').reset();
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // Initialize everything on window load
+        window.onload = function() {
+            initFull3DScene();
+            calculateQuote();
+            initBeforeAfterSlider();
+        }
+    </script>
+</body>
+</html>

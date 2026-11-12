@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mind map</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f4f6f3;--dot:#cfd6d0;--ink:#1d2a33;--muted:#5f6d76;--bar:#ffffffee;--line:#d5dcd7;--accent:#1f7a6d;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#182027;--dot:#2c3943;--ink:#e8eef1;--muted:#9bacb6;--bar:#212c34ee;--line:#34434d;--accent:#4fc0ae;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#182027;--dot:#2c3943;--ink:#e8eef1;--muted:#9bacb6;--bar:#212c34ee;--line:#34434d;--accent:#4fc0ae;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--paper);color:var(--ink);overflow:hidden}
+#stage{position:absolute;inset:0;touch-action:none;cursor:grab;background-image:radial-gradient(var(--dot) 1.2px,transparent 1.2px);background-size:24px 24px}
+#stage.pan{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#edges{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible}
+.n{position:absolute;transform:translate(-50%,-50%);padding:9px 16px;font-weight:600;font-size:15px;white-space:pre;cursor:move;user-select:none;-webkit-user-select:none;border:2.5px solid var(--c);outline-offset:3px}
+.n.root{font-size:19px;padding:13px 24px}
+.n.sel{outline:3px solid var(--accent)}
+.n.link-src{outline:3px dashed var(--accent)}
+.n[contenteditable=true]{cursor:text;user-select:text;-webkit-user-select:text;outline:3px solid var(--accent)}
+.s-box{background:var(--c);color:#fff;border-radius:10px}
+.s-pill{background:var(--c);color:#fff;border-radius:999px}
+.s-outline{background:var(--paper);color:var(--ink);border-radius:10px}
+.s-note{background:color-mix(in srgb,var(--c) 16%,var(--paper));color:var(--ink);border-radius:4px;border-width:2.5px 2.5px 2.5px 8px}
+#bar{position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:5;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:8px 10px;background:var(--bar);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(8px)}
+.grp{display:flex;gap:4px;align-items:center;padding-right:10px;border-right:1px solid var(--line)}
+.grp:last-child{border:0;padding:0;margin-left:auto}
+button{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.4;cursor:default}
+.sw{width:22px;height:22px;padding:0;border-radius:50%;background:var(--c);border:2px solid var(--paper);box-shadow:0 0 0 1px var(--line)}
+.sw.on{box-shadow:0 0 0 2px var(--ink)}
+#hint{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);font-size:12px;color:var(--muted);background:var(--bar);padding:5px 10px;border-radius:8px;z-index:4;max-width:calc(100% - 24px)}
+#dlg{border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);width:min(560px,92vw);padding:18px}
+#dlg::backdrop{background:#0008}
+#dlg h2{margin:0 0 10px;font-size:18px}
+#dlg textarea{width:100%;height:120px;box-sizing:border-box;font:12px ui-monospace,Menlo,monospace;background:var(--bar);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+#dlg img{max-width:100%;max-height:220px;display:block;margin:8px auto;border:1px solid var(--line);border-radius:8px}
+#dlg .row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#msg{font-size:12px;color:var(--muted);min-height:16px}
+</style>
+</head>
+<body>
+<div id="bar" role="toolbar" aria-label="Mind map tools">
+  <div class="grp">
+    <button id="bChild" title="Tab">Add branch</button>
+    <button id="bSib" title="Enter">Add sibling</button>
+    <button id="bLink" title="Connect two related ideas">Link ideas</button>
+    <button id="bDel" title="Delete">Delete</button>
+  </div>
+  <div class="grp" id="styles" aria-label="Node style"></div>
+  <div class="grp" id="colors" aria-label="Node color"></div>
+  <div class="grp">
+    <button id="bFit">Fit view</button>
+    <button id="bSave">Save &amp; export</button>
+    <button id="bNew">New map</button>
+  </div>
+</div>
+<div id="stage"><div id="world"><svg id="edges"></svg><div id="nodes"></div></div></div>
+<div id="hint">Double-click to rename · Drag to move (Shift moves the whole branch) · Scroll to zoom · Tab adds a branch</div>
+
+<dialog id="dlg">
+  <h2>Save &amp; export</h2>
+  <div id="msg">Your map saves in this browser automatically.</div>
+  <img id="png" alt="Mind map preview">
+  <div class="row"><button id="dPng">Download PNG</button><button id="dJson">Download JSON</button><button id="dCopy">Copy JSON</button></div>
+  <textarea id="json" aria-label="Map data (JSON)" spellcheck="false"></textarea>
+  <div class="row"><button id="dLoad">Load map from JSON</button><button id="dClose">Close</button></div>
+</dialog>
+
+<script>
+const COLORS=['#1f7a6d','#2f6db5','#7a4e9e','#c2415d','#b56a12','#44525e'];
+const STYLES=[['box','Box'],['pill','Pill'],['outline','Outline'],['note','Note']];
+const KEY='mindmap-v1';
+let S,sel=null,selLink=null,linking=false,view={x:0,y:0,z:1},editing=false,uid=1;
+const $=s=>document.querySelector(s), world=$('#world'), stage=$('#stage');
+
+function seed(){
+  const m={nodes:[{id:'n1',x:0,y:0,text:'My big idea',style:'pill',color:COLORS[0],parent:null}],links:[]};
+  [['Goals',-1],['Questions',0],['Resources',1]].forEach((t,i)=>{
+    const a=-0.9+i*0.9, c=COLORS[i+1];
+    m.nodes.push({id:'n'+(i+2),x:Math.round(Math.cos(a)*230),y:Math.round(Math.sin(a)*190)*(i==1?0:1)+(i==1?0:0),text:t[0],style:'box',color:c,parent:'n1'});
+  });
+  m.nodes[1].x=230;m.nodes[1].y=-130;m.nodes[2].x=250;m.nodes[2].y=10;m.nodes[3].x=220;m.nodes[3].y=140;
+  return m;
+}
+function load(){try{const t=localStorage.getItem(KEY);if(t){const m=JSON.parse(t);if(m&&m.nodes&&m.nodes.length)return m}}catch(e){}return null}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S=load()||seed();
+uid=Math.max(1,...S.nodes.map(n=>+String(n.id).replace(/\D/g,'')||0))+1;
+
+const byId=id=>S.nodes.find(n=>n.id===id);
+const kids=id=>S.nodes.filter(n=>n.parent===id);
+function subtree(id){const out=[id];kids(id).forEach(k=>out.push(...subtree(k.id)));return out}
+
+function commit(){persist();render()}
+function render(){
+  world.style.transform=`translate(${view.x}px,${view.y}px) scale(${view.z})`;
+  $('#nodes').innerHTML=S.nodes.map(n=>{
+    const cls=['n','s-'+n.style,n.parent?'':'root',n.id===sel?'sel':'',linking&&n.id===sel?'link-src':''].join(' ');
+    return `<div class="${cls}" data-id="${n.id}" style="left:${n.x}px;top:${n.y}px;--c:${n.color}">${esc(n.text)}</div>`;
+  }).join('');
+  let d='';
+  S.nodes.forEach(n=>{const p=n.parent&&byId(n.parent);if(p){const mx=(p.x+n.x)/2;d+=`<path d="M${p.x} ${p.y}C${mx} ${p.y} ${mx} ${n.y} ${n.x} ${n.y}" fill="none" stroke="${n.color}" stroke-width="4" stroke-linecap="round"/>`}});
+  S.links.forEach((l,i)=>{const a=byId(l.a),b=byId(l.b);if(!a||!b)return;
+    const cx=(a.x+b.x)/2-(b.y-a.y)*0.25, cy=(a.y+b.y)/2+(b.x-a.x)*0.25, p=`M${a.x} ${a.y}Q${cx} ${cy} ${b.x} ${b.y}`;
+    d+=`<path d="${p}" fill="none" stroke="${selLink===i?'var(--accent)':'var(--muted)'}" stroke-width="${selLink===i?3.5:2.5}" stroke-dasharray="7 6" stroke-linecap="round"/><path class="lk" data-i="${i}" d="${p}" fill="none" stroke="transparent" stroke-width="18" style="cursor:pointer;pointer-events:stroke"/>`});
+  $('#edges').innerHTML=d;
+  document.querySelectorAll('#styles button').forEach(b=>b.classList.toggle('on',!!sel&&byId(sel)?.style===b.dataset.s));
+  document.querySelectorAll('#colors .sw').forEach(b=>b.classList.toggle('on',!!sel&&byId(sel)?.color===b.dataset.c));
+  $('#bLink').classList.toggle('on',linking);
+  $('#bLink').textContent=linking?'Pick a second idea…':'Link ideas';
+  const has=!!sel;$('#bChild').disabled=$('#bSib').disabled=$('#bLink').disabled=!has;
+  $('#bSib').disabled=!has||!byId(sel)?.parent;
+  $('#bDel').disabled=!has&&selLink===null;
+  document.querySelectorAll('#styles button,#colors .sw').forEach(b=>b.disabled=!has);
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+/* toolbar */
+STYLES.forEach(([s,l])=>{const b=document.createElement('button');b.textContent=l;b.dataset.s=s;b.onclick=()=>{if(sel){byId(sel).style=s;commit()}};$('#styles').appendChild(b)});
+COLORS.forEach(c=>{const b=document.createElement('button');b.className='sw';b.dataset.c=c;b.style.setProperty('--c',c);b.setAttribute('aria-label','Color '+c);b.onclick=()=>{if(sel){byId(sel).color=c;commit()}};$('#colors').appendChild(b)});
+
+function addChild(pid){
+  const p=byId(pid), k=kids(pid), g=p.parent&&byId(p.parent);
+  let base=g?Math.atan2(p.y-g.y,p.x-g.x):-0.6, step=g?0.55:1.1, i=k.length;
+  const ang=g?base+(i%2?1:-1)*Math.ceil(i/2)*step:base+i*step;
+  const dist=g?200:240;
+  const n={id:'n'+(uid++),x:Math.round(p.x+Math.cos(ang)*dist),y:Math.round(p.y+Math.sin(ang)*dist),text:'New idea',style:p.parent?p.style:'box',color:p.parent?p.color:COLORS[(i+1)%COLORS.length],parent:pid};
+  S.nodes.push(n);sel=n.id;selLink=null;commit();startEdit(n.id);
+}
+$('#bChild').onclick=()=>sel&&addChild(sel);
+$('#bSib').onclick=()=>{const n=sel&&byId(sel);if(n&&n.parent)addChild(n.parent)};
+$('#bLink').onclick=()=>{linking=!linking;render()};
+$('#bDel').onclick=del;
+function del(){
+  if(selLink!==null){S.links.splice(selLink,1);selLink=null;return commit()}
+  const n=sel&&byId(sel);if(!n)return;
+  if(!n.parent&&S.nodes.length>1&&!confirm('Delete the central idea and every branch?'))return;
+  const ids=new Set(subtree(n.id));
+  S.nodes=S.nodes.filter(x=>!ids.has(x.id));S.links=S.links.filter(l=>!ids.has(l.a)&&!ids.has(l.b));
+  sel=n.parent||null;commit();
+}
+$('#bNew').onclick=()=>{if(confirm('Start a new map? The current one will be replaced.')){S=seed();uid=10;sel=null;fit();commit()}};
+$('#bFit').onclick=()=>fit();
+
+/* editing */
+function startEdit(id){
+  const el=document.querySelector(`.n[data-id="${id}"]`);if(!el)return;
+  editing=true;el.contentEditable='true';el.focus();
+  const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  const done=ok=>{el.removeEventListener('blur',onb);el.removeEventListener('keydown',onk);editing=false;
+    if(ok){const t=el.innerText.replace(/\n+$/,'').trim();byId(id).text=t||'Untitled'}commit()};
+  const onb=()=>done(true);
+  const onk=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur()}else if(e.key==='Escape'){e.preventDefault();el.removeEventListener('blur',onb);done(false)}e.stopPropagation()};
+  el.addEventListener('blur',onb);el.addEventListener('keydown',onk);
+}
+stage.addEventListener('dblclick',e=>{const el=e.target.closest('.n');if(el){sel=el.dataset.id;render();startEdit(sel)}});
+
+/* pointer: drag nodes, pan canvas */
+let drag=null;
+stage.addEventListener('pointerdown',e=>{
+  if(editing)return;
+  const el=e.target.closest('.n'), lk=e.target.closest('.lk');
+  stage.setPointerCapture(e.pointerId);
+  if(lk){selLink=+lk.dataset.i;sel=null;linking=false;render();drag=null;return}
+  if(el){
+    const id=el.dataset.id;
+    if(linking&&sel&&id!==sel){
+      if(!S.links.some(l=>(l.a===sel&&l.b===id)||(l.a===id&&l.b===sel))&&byId(id).parent!==sel&&byId(sel).parent!==id)S.links.push({a:sel,b:id});
+      linking=false;sel=id;commit();drag=null;return;
+    }
+    sel=id;selLink=null;
+    const ids=e.shiftKey?subtree(id):[id];
+    drag={t:'node',sx:e.clientX,sy:e.clientY,ids,orig:ids.map(i=>[byId(i).x,byId(i).y]),moved:false};
+    render();
+  }else{
+    sel=null;selLink=null;linking=false;render();
+    drag={t:'pan',sx:e.clientX,sy:e.clientY,ox:view.x,oy:view.y};stage.classList.add('pan');
+  }
+});
+stage.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;
+  if(drag.t==='pan'){view.x=drag.ox+dx;view.y=drag.oy+dy;world.style.transform=`translate(${view.x}px,${view.y}px) scale(${view.z})`;return}
+  if(!drag.moved&&Math.hypot(dx,dy)<4)return;
+  drag.moved=true;
+  drag.ids.forEach((id,i)=>{const n=byId(id);n.x=Math.round(drag.orig[i][0]+dx/view.z);n.y=Math.round(drag.orig[i][1]+dy/view.z)});
+  render();
+});
+const end=()=>{if(drag&&drag.t==='node'&&drag.moved)persist();drag=null;stage.classList.remove('pan')};
+stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+stage.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const z=Math.min(2.5,Math.max(0.25,view.z*(e.deltaY<0?1.1:1/1.1))),k=z/view.z;
+  view.x=e.clientX-(e.clientX-view.x)*k;view.y=e.clientY-(e.clientY-view.y)*k;view.z=z;render();
+},{passive:false});
+
+document.addEventListener('keydown',e=>{
+  if(editing||$('#dlg').open)return;
+  if(e.key==='Tab'&&sel){e.preventDefault();addChild(sel)}
+  else if(e.key==='Enter'&&sel){e.preventDefault();const n=byId(sel);if(n.parent)addChild(n.parent)}
+  else if(e.key==='F2'&&sel){startEdit(sel)}
+  else if((e.key==='Delete'||e.key==='Backspace')&&(sel||selLink!==null)){e.preventDefault();del()}
+  else if(e.key==='Escape'){linking=false;sel=null;selLink=null;render()}
+});
+
+function fit(){
+  const w=stage.clientWidth,h=stage.clientHeight;
+  const xs=S.nodes.map(n=>n.x),ys=S.nodes.map(n=>n.y);
+  const minX=Math.min(...xs)-120,maxX=Math.max(...xs)+120,minY=Math.min(...ys)-80,maxY=Math.max(...ys)+80;
+  const z=Math.min(1.2,Math.max(0.3,Math.min(w/(maxX-minX),(h-90)/(maxY-minY))));
+  view.z=z;view.x=w/2-((minX+maxX)/2)*z;view.y=h/2+30-((minY+maxY)/2)*z;render();
+}
+
+/* export */
+function toPNG(){
+  const els=[...document.querySelectorAll('.n')];
+  const cs=getComputedStyle(document.documentElement),paper=cs.getPropertyValue('--paper').trim(),ink=cs.getPropertyValue('--ink').trim();
+  const box=S.nodes.map(n=>{const el=document.querySelector(`.n[data-id="${n.id}"]`);return{n,w:el.offsetWidth,h:el.offsetHeight,f:n.parent?15:19}});
+  const pad=60,minX=Math.min(...box.map(b=>b.n.x-b.w/2))-pad,maxX=Math.max(...box.map(b=>b.n.x+b.w/2))+pad,minY=Math.min(...box.map(b=>b.n.y-b.h/2))-pad,maxY=Math.max(...box.map(b=>b.n.y+b.h/2))+pad;
+  const sc=2,c=document.createElement('canvas');c.width=(maxX-minX)*sc;c.height=(maxY-minY)*sc;
+  const g=c.getContext('2d');g.scale(sc,sc);g.translate(-minX,-minY);
+  g.fillStyle=paper;g.fillRect(minX,minY,maxX-minX,maxY-minY);g.lineCap='round';
+  S.nodes.forEach(n=>{const p=n.parent&&byId(n.parent);if(!p)return;const mx=(p.x+n.x)/2;g.strokeStyle=n.color;g.lineWidth=4;g.beginPath();g.moveTo(p.x,p.y);g.bezierCurveTo(mx,p.y,mx,n.y,n.x,n.y);g.stroke()});
+  g.setLineDash([7,6]);g.strokeStyle='#8a979f';g.lineWidth=2.5;
+  S.links.forEach(l=>{const a=byId(l.a),b=byId(l.b);if(!a||!b)return;g.beginPath();g.moveTo(a.x,a.y);g.quadraticCurveTo((a.x+b.x)/2-(b.y-a.y)*0.25,(a.y+b.y)/2+(b.x-a.x)*0.25,b.x,b.y);g.stroke()});
+  g.setLineDash([]);
+  box.forEach(({n,w,h,f})=>{
+    const x=n.x-w/2,y=n.y-h/2,r=n.style==='pill'?h/2:n.style==='note'?4:10;
+    g.beginPath();g.roundRect(x,y,w,h,r);
+    g.fillStyle=n.style==='outline'?paper:n.style==='note'?mix(n.color,paper):n.color;g.fill();
+    g.lineWidth=2.5;g.strokeStyle=n.color;g.stroke();
+    if(n.style==='note'){g.fillStyle=n.color;g.beginPath();g.roundRect(x,y,8,h,[4,0,0,4]);g.fill()}
+    g.fillStyle=(n.style==='box'||n.style==='pill')?'#fff':ink;g.font=`600 ${f}px Figtree,system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';
+    const lines=n.text.split('\n'),lh=f*1.3;lines.forEach((t,i)=>g.fillText(t,n.x+(n.style==='note'?3:0),n.y+(i-(lines.length-1)/2)*lh));
+  });
+  return c.toDataURL('image/png');
+}
+function mix(c,paper){const h=s=>{s=s.trim();if(s[0]==='#'){if(s.length===4)s='#'+[...s.slice(1)].map(x=>x+x).join('');return[1,3,5].map(i=>parseInt(s.substr(i,2),16))}return(s.match(/\d+/g)||[244,246,243]).slice(0,3).map(Number)};
+  const a=h(c),b=h(paper);return'rgb('+a.map((v,i)=>Math.round(v*.16+b[i]*.84)).join(',')+')'}
+function download(name,href){const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove()}
+const say=t=>$('#msg').textContent=t;
+$('#bSave').onclick=()=>{
+  persist();$('#json').value=JSON.stringify(S,null,1);
+  try{$('#png').src=toPNG();$('#png').hidden=false}catch(e){$('#png').hidden=true}
+  say('Saved in this browser. Copy the JSON to keep a backup, or save the PNG image.');
+  $('#dlg').showModal();
+};
+$('#dClose').onclick=()=>$('#dlg').close();
+$('#dPng').onclick=()=>{try{download('mind-map.png',toPNG());say('If nothing downloaded, press and hold (or right-click) the preview and choose Save image.')}catch(e){say('Export failed. Save the preview image instead.')}};
+$('#dJson').onclick=()=>{try{download('mind-map.json','data:application/json;charset=utf-8,'+encodeURIComponent($('#json').value));say('If nothing downloaded, use Copy JSON instead.')}catch(e){say('Download blocked. Use Copy JSON instead.')}};
+$('#dCopy').onclick=async()=>{const t=$('#json');t.select();try{await navigator.clipboard.writeText(t.value);say('JSON copied.')}catch(e){try{document.execCommand('copy');say('JSON copied.')}catch(_){say('Select the text above and copy it manually.')}}};
+$('#dLoad').onclick=()=>{
+  try{const m=JSON.parse($('#json').value);
+    if(!m||!Array.isArray(m.nodes)||!m.nodes.length||!m.nodes.every(n=>n.id&&typeof n.x==='number'&&typeof n.y==='number'))throw 0;
+    S={nodes:m.nodes.map(n=>({id:String(n.id),x:n.x,y:n.y,text:String(n.text??''),style:n.style||'box',color:n.color||COLORS[0],parent:n.parent||null})),links:Array.isArray(m.links)?m.links:[]};
+    uid=Math.max(1,...S.nodes.map(n=>+String(n.id).replace(/\D/g,'')||0))+1;sel=null;selLink=null;fit();commit();$('#dlg').close();
+  }catch(e){say('That JSON isn’t a valid mind map. Paste a map you exported earlier.')}
+};
+
+addEventListener('resize',render);
+fit();
+</script>
+</body>
+</html>

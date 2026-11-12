@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Document</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
+  <style>
+    body {
+      background: linear-gradient(
+        125deg,
+        #E8EDF2 0%,
+        #B6AABF 42%,
+        #32152F 100%
+      );
+      min-height: 100vh;
+    }
+  </style>
+
+  </head>
+
+<body>
+  <section>
+    <nav class="navbar md:navbar-expand bg-1">
+      <div class="container-fluid">
+        <span class="avatar">
+          <img class="avatar-img" src="images/10933364.jpg" alt="mdo">
+        </span>
+        <h3 class="navbar-brand" href="#" style="margin-left: 15px; margin-top: 5px;">Abubakar</h3>
+        <button class="btn-icon navbar-toggler" type="button" data-bs-toggle="drawer" data-bs-target="#navbarDrawer"
+          aria-controls="navbarDrawer" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon" aria-hidden="true"></span>
+        </button>
+        <dialog class="drawer drawer-end" tabindex="-1" id="navbarDrawer" aria-labelledby="navbarDrawerLabel">
+          <div class="drawer-header">
+            <h5 class="drawer-title" id="navbarDrawerLabel">Menu</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="drawer" aria-label="Close"></button>
+            ]
+          </div>
+          <div class="drawer-body mb-2 md:mb-0">
+            <ul class="nav navbar-nav me-auto">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" type="button" data-bs-toggle="menu" aria-expanded="false">
+                  Menu
+                </button>
+                <div class="menu">
+                  <a class="menu-item" href="#">Action</a>
+                  <a class="menu-item" href="#">Another action</a>
+                  <hr class="menu-divider">
+                  <a class="menu-item" href="#">Something else here</a>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+              </li>
+            </ul>
+            <form class="hstack gap-2" role="search">
+              <input class="form-control" type="search" placeholder="Search" aria-label="Search" />
+              <button class="btn-solid btn-icon theme-secondary" type="submit">
+                <svg class="bi" width="16" height="16">
+                  <use href="#search" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        </dialog>
+      </div>
+    </nav>
+  </section>
+  <section class="hero" style="padding: 100px;">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-10 me-auto">
+          <h1 style="
+    font-size: 36px;
+    font-weight: 400;
+    text-align: center;
+    text-transform: uppercase;
+    line-height: 1.6;">Welcome on my web site! <b>I am waiting for you </b></h1>
+        </div>
+      </div>
+    </div>
+
+  </section>
+  <section class="container">
+    <div class="row ">
+
+
+      <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+        <div class="accordion">
+          <details class="accordion-item" name="accordionExample" open>
+            <summary class="accordion-header">
+              What is your name ?
+              <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"
+                stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m2 5 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="accordion-body">
+              <strong>This is the first item’s accordion body.</strong> It is shown by default because the
+              <code>open</code> attribute is present. The native <code>&lt;details&gt;</code> element
+              handles all the show/hide logic without any JavaScript. You can put any HTML content within
+              the <code>.accordion-body</code>.
+            </div>
+          </details>
+          <details class="accordion-item" name="accordionExample">
+            <summary class="accordion-header">
+              What is your age ?
+              <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"
+                stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m2 5 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="accordion-body">
+              <strong>This is the second item’s accordion body.</strong> The <code>name</code> attribute
+              groups this with other accordion items. When you open this item, any other open item in the
+              same group will close automatically.
+            </div>
+          </details>
+          <details class="accordion-item" name="accordionExample">
+            <summary class="accordion-header">
+              What is your date of birth?
+              <svg class="accordion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"
+                stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m2 5 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="accordion-body">
+              <strong>This is the third item’s accordion body.</strong> This exclusive accordion behavior
+              is built into the browser—no Bootstrap JavaScript required. Just use matching
+              <code>name</code> attributes on your <code>&lt;details&gt;</code> elements.
+            </div>
+          </details>
+        </div>
+      </div>
+
+    </div>
+
+
+  </section>
+  <section>
+    <div id="carouselVariable" class="carousel carousel-auto slide" data-bs-ends="stop"
+      style="--bs-carousel-items-gap: 1rem;">
+      
+      <div class="carousel-inner">
+        <div class="carousel-item active" style="width: 450px; margin-left: 20px; margin-top: 20px;">
+          <img src="images/pic1.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+        <div class="carousel-item" style="width: 450px; margin-top: 20px;">
+          <img src="images/pic2.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+        <div class="carousel-item" style="width: 350px; margin-top: 20px;">
+          <img src="images/pic3.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+
+      </div>
+    </div>
+  </section>
+   <section>
+    <div id="carouselVariable" class="carousel carousel-auto slide" data-bs-ends="stop"
+      style="--bs-carousel-items-gap: 1rem;">
+      
+      <div class="carousel-inner">
+        <div class="carousel-item active" style="width: 350px; margin-left: 20px; margin-top: 20px;">
+          <img src="images/pic3.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+        <div class="carousel-item" style="width: 450px; margin-top: 20px;">
+          <img src="images/pic1.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+        <div class="carousel-item" style="width: 450px; margin-top: 20px;">
+          <img src="images/pic2.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <section>
+    <div id="carouselVariable" class="carousel carousel-auto slide" data-bs-ends="stop"
+      style="--bs-carousel-items-gap: 1rem;">
+      
+      <div class="carousel-inner">
+        <div class="carousel-item active" style="width: 370px; margin-left: 20px; margin-top: 20px;">
+          <img src="images/pic1.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+         <div class="carousel-item" style="width: 400px; margin-top: 20px;">
+          <img src="images/10933364.jpg" class="d-block w-100 rounded-5" alt="...">
+        </div>
+        <div class="carousel-item" style="width: 450px; margin-top: 20px;">
+          <img src="images/pic2.png" class="d-block w-100 rounded-5" alt="...">
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <form class="row g-3">
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <label for="inputEmail4" class="form-label">Email</label>
+      <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+    </div>
+    </div>
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <label for="inputPassword4" class="form-label">Password</label>
+      <input type="password" class="form-control" id="password1" placeholder="Enter password">
+    </div>
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <label for="inputAddress" class="form-label">Address</label>
+      <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
+    </div>
+
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <label for="inputCity" class="form-label">Country</label>
+      <button class="form-control combobox-toggle" type="button" data-bs-toggle="combobox" data-bs-name="country"
+        data-bs-placeholder="Select a country…" data-bs-search="true">
+        <span class="combobox-value">Select a country…</span>
+        <svg class="combobox-caret" width="10" height="16" viewBox="0 0 10 16" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M0.46967 5.46967C0.762563 5.17678 1.23744 5.17678 1.53033 5.46967L5 8.93934L8.46967 5.46967C8.76256 5.17678 9.23744 5.17678 9.53033 5.46967C9.82322 5.76256 9.82322 6.23744 9.53033 6.53033L5.53033 10.5303C5.23744 10.8232 4.76256 10.8232 4.46967 10.5303L0.46967 6.53033C0.176777 6.23744 0.176777 5.76256 0.46967 5.46967Z"
+            fill="currentcolor" />
+        </svg>
+      </button>
+      <div class="menu">
+        <div class="combobox-search">
+          <input type="text" class="form-control combobox-search-input" placeholder="Search…" autocomplete="off"
+            aria-label="Search…">
+        </div>
+        <button class="menu-item" type="button" data-bs-value="us">United States</button>
+        <button class="menu-item" type="button" data-bs-value="uk">United Kingdom</button>
+        <button class="menu-item" type="button" data-bs-value="ca">Canada</button>
+        <button class="menu-item" type="button" data-bs-value="au">Australia</button>
+        <button class="menu-item" type="button" data-bs-value="de">Germany</button>
+        <button class="menu-item" type="button" data-bs-value="fr">France</button>
+        <button class="menu-item" type="button" data-bs-value="jp">Japan</button>
+        <button class="menu-item" type="button" data-bs-value="br">Brazil</button>
+        <button class="menu-item" type="button" data-bs-value="in">India</button>
+        <button class="menu-item" type="button" data-bs-value="mx">Mexico</button>
+        <div class="combobox-no-results d-none">No results found</div>
+      </div>
+    </div>
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <label for="inputState" class="form-label">State</label>
+      <select id="inputState" class="form-control">
+        <option selected>Choose...</option>
+        <option>...</option>
+      </select>
+    </div>
+    s
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <div class="form-field">
+        <input type="checkbox" id="gridCheck" class="check">
+        <label for="gridCheck">
+          Check me out
+        </label>
+      </div>
+    </div>
+    <div class="sm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample">
+      <button type="submit" class="btn-solid theme-primary">Sign in</button>
+    </div>
+    <div class="form-floatingsm:col-12 md:col-6 lg:col-4 accordion w-75 mx-auto " id="accordionExample"
+      style="--bs-form-floating-height: 100px">
+      <label for="floatingTextarea2">Comments</label>
+      <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea2"></textarea>
+    </div>
+  </form>
+
+
+
+  <script type="module" src="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-1a/pXj49ZQ1aHEmrJ+gMw1otqoVsYwlEnlD8mIfY2TV03r20Y0CN7uqx1tQogjPL"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
